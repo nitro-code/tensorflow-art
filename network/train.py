@@ -52,11 +52,14 @@ def input_batch(mode):
       min_after_dequeue=min_after_dequeue,
       capacity=capacity)
 
-  label_batch = tf.Print(label_batch, [label_batch], message="labels: ", summarize=BATCH_SIZE)
+  #label_batch = tf.Print(label_batch, [label_batch], message="labels: ", summarize=BATCH_SIZE)
   return image_batch, label_batch
 
 
+tf.logging.set_verbosity(tf.logging.INFO)
+
 with tf.Session() as sess:
+  tf.global_variables_initializer().run()
   classifier = learn.Estimator(model_fn=model_fn, model_dir=CHECKPOINTS_DIR)
 
   input_fn_train = lambda: input_batch(learn.ModeKeys.TRAIN)
