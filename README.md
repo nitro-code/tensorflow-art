@@ -25,7 +25,7 @@ Start Web Server
 ================
 
 ```
-$ gunicorn main:app --log-file=- --timeout=600
+$ gunicorn main:app --log-file=- --timeout=600 --preload
 ```
 
 
