@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="index, follow, noarchive" />
+    <title>Deep Neural Network Artwork Classifier</title>
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/jquery.fileupload.css">
+    <script src="/static/js/jquery-3.1.1.min.js"></script>
+    <script src="/static/js/jquery.ui.widget.js"></script>
+    <script src="/static/js/jquery.iframe-transport.js"></script>
+    <script src="/static/js/jquery.fileupload.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Deep Neural Network Artwork Classifier</h1>
+
+      <hr />
+
+      <div class="row">
+        <div class="col-sm-6">
+          <h3>Artwork Image Upload</h3>
+          <div class="panel panel-default">
+            <div class="panel-body">
+              <span class="btn btn-success fileinput-button">
+                <span>Select Artwork Image File</span>
+                <input id="fileupload" type="file" name="file"/>
+              </span>
+            </div>
+          </div>
+          <div id="progress" class="progress">
+            <div class="progress-bar progress-bar-success"></div>
+          </div>
+          <div id="files" class="files"></div>
+        </div>
+        <div class="col-sm-6">
+          <h3>Artwork Classification Result</h3>
+          <div class="panel panel-default">
+            <div class="panel-body">
+              <div id="result"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      $(function() {
+        $('#fileupload').fileupload({
+          url: '/api/v1/classify',
+          dataType: 'json',
+          progressall: function(e, data) {
+            var progress = parseInt(data.loaded / data.total * 100, 10);
+            $('#progress .progress-bar').css('width', progress + '%');
+          },
+          done: function (e, data) {
+            $('#result').empty();
+            $('#progress .progress-bar').css('width', '0%');
+
+            $.each(data.result, function(index, image) {
+              $.each(image, function(index, artist) {
+                var percent = Math.round(artist.probability * 1000) / 10;
+                $('<p/>').text(artist.description + ': ' + percent + ' %').appendTo('#result');
+              });
+            });
+          }
+        })
+        .on('change', function(e){
+          $('#files').empty();
+          $('#result').empty();
+
+          var files = e.target.files;
+          var f = files[0];
+          var reader = new FileReader();
+
+          reader.onload = (function(file) {
+            return function(e) {
+              var img = $('<img>');
+              img.attr('src', e.target.result);
+              img.attr('title', file.name);
+              img.addClass('img-responsive');
+              img.appendTo('#files');
+            };
+          })(f);
+
+          reader.readAsDataURL(f);
+        })
+        .prop('disabled', !$.support.fileInput).parent().addClass($.support.fileInput ? undefined : 'disabled');
+      });
+    </script>
+  </body>
+</html>
