@@ -14,9 +14,9 @@ from network.image import preprocess_image, ARTISTS, WIDTH, HEIGHT
 MODEL_URL = "http://nitro.ai/assets/models/art"
 
 CHECKPOINT_FILE = "checkpoint"
-MODEL_CHECKPOINT_FILE = "model.ckpt-22810.data-00000-of-00001"
-MODEL_INDEX_FILE = "model.ckpt-22810.index"
-MODEL_META_FILE = "model.ckpt-22810.meta"
+MODEL_CHECKPOINT_FILE = "model.ckpt.data-00000-of-00001"
+MODEL_INDEX_FILE = "model.ckpt.index"
+MODEL_META_FILE = "model.ckpt.meta"
 
 CHECKPOINTS_DIR = './checkpoints'
 

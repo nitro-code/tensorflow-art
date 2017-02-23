@@ -5,28 +5,33 @@ from tensorflow.contrib.learn.python.learn.estimators import model_fn as model_f
 from image import ARTISTS_LEN, WIDTH, HEIGHT, CHANNELS
 
 
-LEARN_RATE = 1e-3
+LEARN_RATE = 1e-2
 
 def model_fn(features, labels, mode):
   x = tf.reshape(features, [-1, HEIGHT, WIDTH, CHANNELS])
   tf.summary.image('images', x, 4)
 
-  x = repeat(x, 2, conv2d, 16, [3, 3], [2, 2], scope='conv1')
-  x = tf.layers.max_pooling2d(inputs=x, pool_size=[2, 2], strides=2)
+  x = repeat(x, 2, conv2d, 32, 3, 2, scope='conv1', activation_fn=tf.nn.tanh)
+  x = tf.layers.max_pooling2d(inputs=x, pool_size=2, strides=2)
 
-  x = repeat(x, 2, conv2d, 32, [3, 3], [2, 2], scope='conv2')
-  x = tf.layers.max_pooling2d(inputs=x, pool_size=[2, 2], strides=2)
+  x = repeat(x, 2, conv2d, 64, 3, 2, scope='conv2', activation_fn=tf.nn.tanh)
+  x = tf.layers.max_pooling2d(inputs=x, pool_size=2, strides=2)
 
-  x = tf.reshape(x, [-1, 8 * 8 * 32])
+  x = tf.reshape(x, [-1, 8 * 8 * 64])
 
-  with tf.name_scope('fc'):
-    x = tf.layers.dense(inputs=x, units=ARTISTS_LEN, activation=tf.nn.relu)
+  with tf.name_scope('fc1'):
+    x = tf.layers.dense(inputs=x, units=1024, activation=tf.nn.tanh)
+
+  x = tf.layers.dropout(inputs=x, rate=0.4, training=mode == learn.ModeKeys.TRAIN)
+
+  with tf.name_scope('fc2'):
+    x = tf.layers.dense(inputs=x, units=ARTISTS_LEN, activation=tf.nn.tanh)
 
   loss = None
   train_op = None
 
   if mode != learn.ModeKeys.INFER:
-    onehot_labels = tf.one_hot(labels, depth=ARTISTS_LEN)
+    onehot_labels = tf.one_hot(indices=tf.cast(labels, tf.int32), depth=ARTISTS_LEN)
     loss = tf.losses.softmax_cross_entropy(onehot_labels=onehot_labels, logits=x)
     train_op = tf.contrib.layers.optimize_loss(loss=loss, global_step=tf.contrib.framework.get_global_step(), optimizer="Adam", learning_rate=LEARN_RATE)
 

@@ -7,8 +7,8 @@ from model import model_fn, WIDTH, HEIGHT, CHANNELS
 TRAIN_DIR = '/home/models/art/preprocessed'
 CHECKPOINTS_DIR = './../checkpoints'
 
-BATCH_SIZE = 64
-STEPS_TRAIN = 1000
+BATCH_SIZE = 128
+STEPS_TRAIN = 200
 STEPS_EVAL = 10
 EPOCHS = 100000
 
@@ -52,7 +52,7 @@ def input_batch(mode):
       min_after_dequeue=min_after_dequeue,
       capacity=capacity)
 
-  #label_batch = tf.Print(label_batch, [label_batch], message="labels: ", summarize=BATCH_SIZE)
+  label_batch = tf.Print(label_batch, [label_batch], message="labels: ", summarize=BATCH_SIZE)
   return image_batch, label_batch
 
 
