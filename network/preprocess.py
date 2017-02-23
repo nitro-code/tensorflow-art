@@ -1,22 +1,14 @@
 import os
-from PIL import Image, ImageOps
 import cStringIO
 import tensorflow as tf
+from image import preprocess_image, WIDTH, HEIGHT, CHANNELS
 
-
-CROP_LEFT = 25
-CROP_RIGHT = 25
-CROP_BOTTOM = 25
-CROP_TOP = 25
 
 SOURCE_DIR = "/home/models/art/original"
 TARGET_DIR = "/home/models/art/preprocessed"
 
 TRAIN_EXTENSION = "train"
 VALIDATION_EXTENSION = "validation"
-
-WIDTH = 512
-HEIGHT = 512
 VALIDATION_MOD = 25
 
 
@@ -51,25 +43,17 @@ def write_artist_tfrecord(artist_number, artist_dir, image_number, image_path, e
   print "writing tfrecord for artist {}, label {} and image {} into {}".format(artist_dir, artist_number, image_number, output_file)
 
   writer = tf.python_io.TFRecordWriter(output_file)
-  image_buffer, height, width = process_image(image_path)
-  example = convert_to_example(filename, image_buffer, artist_number, filename, height, width)
+  image = preprocess_image(image_path)
+  image_jpeg = cStringIO.StringIO()
+  image.save(image_jpeg, "JPEG")
+
+  example = convert_to_example(filename, image_jpeg, artist_number, filename, image.height, image.width)
   writer.write(example.SerializeToString())
-
   writer.close()
-
-def process_image(image_path):
-  image = Image.open(image_path)
-  image = ImageOps.autocontrast(image, 0.1)
-  image = image.crop((CROP_LEFT, CROP_TOP, image.width - CROP_RIGHT, image.height - CROP_BOTTOM))
-  image = image.resize((WIDTH, HEIGHT), Image.ANTIALIAS)
-
-  image_buffer = cStringIO.StringIO()
-  image.save(image_buffer, "JPEG")
-  return image_buffer, image.height, image.width
 
 def convert_to_example(filename, image_buffer, label, text, height, width):
   colorspace = 'RGB'
-  channels = 3
+  channels = CHANNELS
   image_format = 'JPEG'
   image_data = image_buffer.getvalue()
 

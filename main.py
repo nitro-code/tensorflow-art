@@ -2,12 +2,13 @@ from flask import Flask, request
 from flask_cors import CORS, cross_origin
 import os
 import json
-from PIL import Image
+import urllib
+from PIL import Image, ImageOps
 import StringIO
 import numpy as np
 from tensorflow.contrib import learn
-from network.model import model_fn, artists, WIDTH, HEIGHT, CHANNELS
-import urllib
+from network.model import model_fn
+from network.image import preprocess_image, ARTISTS, WIDTH, HEIGHT
 
 
 MODEL_URL = "http://nitro.ai/assets/models/art"
@@ -57,7 +58,7 @@ def decode_predictions(predictions, top=3):
   for prediction in predictions:
     probabilities = prediction['probabilities']
     top_indices = probabilities.argsort()[-top:][::-1]
-    result = [{'description' : artists[i], 'probability' : probabilities[i]} for i in top_indices]
+    result = [{'description' : ARTISTS[i], 'probability' : probabilities[i]} for i in top_indices]
     results.append(result)
 
   return results
@@ -88,10 +89,9 @@ def classify():
   file = request.files['file']
 
   if file:
-    img_data = StringIO.StringIO(file.read())
-    pil_img = Image.open(img_data)
-    pil_img = pil_img.resize((WIDTH, HEIGHT), Image.ANTIALIAS)
-    img_array = pil2array(pil_img)
+    image_jpeg = StringIO.StringIO(file.read())
+    image = preprocess_image(image_jpeg)
+    img_array = pil2array(image)
     img_array_batch = np.expand_dims(img_array, axis=0)
 
     input_fn = lambda: img_array_batch
