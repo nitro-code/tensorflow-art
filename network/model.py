@@ -28,6 +28,7 @@ def model_fn(features, labels, mode):
   with tf.name_scope('fc2'):
     x = tf.layers.dense(inputs=x, units=ARTISTS_LEN)
 
+  classes = tf.argmax(input=x, axis=1)
   loss = None
   accuracy = None
   train_op = None
@@ -39,7 +40,6 @@ def model_fn(features, labels, mode):
 
     loss = tf.losses.softmax_cross_entropy(onehot_labels=one_hot_labels, logits=x)
 
-    classes = tf.argmax(input=x, axis=1)
     correct_prediction = tf.equal(classes, labels)
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
