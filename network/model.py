@@ -2,6 +2,7 @@ import tensorflow as tf
 from tensorflow.contrib import learn
 from tensorflow.contrib.layers import conv2d, dropout, repeat
 from tensorflow.contrib.learn.python.learn.estimators import model_fn as model_fn_lib
+from tensorflow.contrib.learn.python.learn.estimators import metric_key
 from image import ARTISTS_LEN, WIDTH, HEIGHT, CHANNELS
 
 
@@ -26,29 +27,36 @@ def model_fn(features, labels, mode):
 
   with tf.name_scope('fc2'):
     x = tf.layers.dense(inputs=x, units=ARTISTS_LEN)
-    x = tf.Print(x, [x], message="logits: ", summarize=ARTISTS_LEN)
 
   loss = None
+  accuracy = None
   train_op = None
 
-  if mode != learn.ModeKeys.INFER:
+  if mode == learn.ModeKeys.TRAIN or mode == learn.ModeKeys.EVAL:
+    x = tf.Print(x, [x], message="logits: ", summarize=ARTISTS_LEN)
     one_hot_labels = tf.one_hot(indices=tf.cast(labels, tf.int32), depth=ARTISTS_LEN)
     one_hot_labels = tf.Print(one_hot_labels, [one_hot_labels], message="one_hot_labels: ", summarize=ARTISTS_LEN)
 
     loss = tf.losses.softmax_cross_entropy(onehot_labels=one_hot_labels, logits=x)
 
+    classes = tf.argmax(input=x, axis=1)
+    correct_prediction = tf.equal(classes, labels)
+    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+
+  if mode == learn.ModeKeys.TRAIN:
     train_op = tf.contrib.layers.optimize_loss(loss=loss, global_step=tf.contrib.framework.get_global_step(), optimizer="Adam", learning_rate=LEARN_RATE)
     train_op = tf.Print(train_op, [train_op], message="train_op loss: ")
+    tf.summary.scalar("accuracy", accuracy)
 
   with tf.name_scope('readout'):
     predictions = {
-      "classes": tf.argmax(input=x, axis=1),
-      "probabilities": tf.nn.softmax(x, name="softmax_tensor")
+      "probabilities": tf.nn.softmax(x, name="softmax_tensor"),
+      "classes": classes
     }
 
   with tf.name_scope('evaluation'):
     eval_metric_ops = {
-      "val_loss": loss
+      metric_key.MetricKey.ACCURACY: accuracy
     }
 
   return model_fn_lib.ModelFnOps(mode, predictions=predictions, loss=loss, train_op=train_op, eval_metric_ops=eval_metric_ops)

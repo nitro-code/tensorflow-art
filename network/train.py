@@ -1,6 +1,7 @@
 import os
 import tensorflow as tf
 from tensorflow.contrib import learn
+from tensorflow.python.ops import control_flow_ops
 from model import model_fn, WIDTH, HEIGHT, CHANNELS
 
 
@@ -12,6 +13,38 @@ STEPS_TRAIN = 200
 STEPS_EVAL = 10
 EPOCHS = 100000
 
+
+def apply_with_random_selector(x, func, num_cases):
+  sel = tf.random_uniform([], maxval=num_cases, dtype=tf.int32)
+  return control_flow_ops.merge([
+      func(control_flow_ops.switch(x, tf.equal(sel, case))[1], case)
+      for case in range(num_cases)])[0]
+
+def distort_color(image, color_ordering=0):
+  if color_ordering == 0:
+    image = tf.image.random_brightness(image, max_delta=32. / 255.)
+    image = tf.image.random_saturation(image, lower=0.5, upper=1.5)
+    image = tf.image.random_hue(image, max_delta=0.1)
+    image = tf.image.random_contrast(image, lower=0.5, upper=1.5)
+  elif color_ordering == 1:
+    image = tf.image.random_saturation(image, lower=0.5, upper=1.5)
+    image = tf.image.random_brightness(image, max_delta=32. / 255.)
+    image = tf.image.random_contrast(image, lower=0.5, upper=1.5)
+    image = tf.image.random_hue(image, max_delta=0.1)
+  elif color_ordering == 2:
+    image = tf.image.random_contrast(image, lower=0.5, upper=1.5)
+    image = tf.image.random_hue(image, max_delta=0.1)
+    image = tf.image.random_brightness(image, max_delta=32. / 255.)
+    image = tf.image.random_saturation(image, lower=0.5, upper=1.5)
+  elif color_ordering == 3:
+    image = tf.image.random_hue(image, max_delta=0.1)
+    image = tf.image.random_saturation(image, lower=0.5, upper=1.5)
+    image = tf.image.random_contrast(image, lower=0.5, upper=1.5)
+    image = tf.image.random_brightness(image, max_delta=32. / 255.)
+  else:
+    raise ValueError('color_ordering must be in [0, 3]')
+
+  return tf.clip_by_value(image, 0.0, 1.0)
 
 def input_batch(mode):
   if mode == learn.ModeKeys.TRAIN:
@@ -36,17 +69,20 @@ def input_batch(mode):
       })
 
   label = features['image/label']
-
   image = tf.image.decode_jpeg(features['image/encoded'], channels=CHANNELS)
-  float_image = tf.cast(image, tf.float32)
-  float_image = tf.reshape(float_image, [HEIGHT, WIDTH, CHANNELS])
 
-  num_threads = 10
-  min_after_dequeue = BATCH_SIZE * 10
+  if image.dtype != tf.float32:
+      image = tf.image.convert_image_dtype(image, dtype=tf.float32)
+
+  image = tf.reshape(image, [HEIGHT, WIDTH, CHANNELS])
+  image = apply_with_random_selector(image, lambda x, ordering: distort_color(x, ordering), num_cases=4)
+
+  num_threads = 4
+  min_after_dequeue = BATCH_SIZE * 4
   capacity = min_after_dequeue + num_threads * BATCH_SIZE
 
   image_batch, label_batch = tf.train.shuffle_batch(
-      [float_image, label],
+      [image, label],
       num_threads=num_threads,
       batch_size=BATCH_SIZE,
       min_after_dequeue=min_after_dequeue,
