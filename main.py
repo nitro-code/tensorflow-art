@@ -57,8 +57,8 @@ def decode_predictions(predictions, top=3):
 
   for prediction in predictions:
     probabilities = prediction['probabilities']
-    top_indices = probabilities.argsort()[-top:][::-1]
-    result = [{'description' : ARTISTS[i], 'probability' : probabilities[i]} for i in top_indices]
+    classes = prediction['classes']
+    result = [{'description' : ARTISTS[classes], 'probability' : probabilities[classes]}]
     results.append(result)
 
   return results

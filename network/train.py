@@ -8,7 +8,7 @@ from model import model_fn, WIDTH, HEIGHT, CHANNELS
 TRAIN_DIR = '/home/models/art/preprocessed'
 CHECKPOINTS_DIR = './../checkpoints'
 
-BATCH_SIZE = 128
+BATCH_SIZE = 32
 STEPS_TRAIN = 200
 STEPS_EVAL = 10
 EPOCHS = 100000
@@ -23,23 +23,23 @@ def apply_with_random_selector(x, func, num_cases):
 def distort_color(image, color_ordering=0):
   if color_ordering == 0:
     image = tf.image.random_brightness(image, max_delta=32. / 255.)
-    image = tf.image.random_saturation(image, lower=0.5, upper=1.5)
-    image = tf.image.random_hue(image, max_delta=0.1)
-    image = tf.image.random_contrast(image, lower=0.5, upper=1.5)
+    image = tf.image.random_saturation(image, lower=0.75, upper=1.25)
+    image = tf.image.random_hue(image, max_delta=0.05)
+    image = tf.image.random_contrast(image, lower=0.75, upper=1.25)
   elif color_ordering == 1:
-    image = tf.image.random_saturation(image, lower=0.5, upper=1.5)
+    image = tf.image.random_saturation(image, lower=0.75, upper=1.25)
     image = tf.image.random_brightness(image, max_delta=32. / 255.)
-    image = tf.image.random_contrast(image, lower=0.5, upper=1.5)
-    image = tf.image.random_hue(image, max_delta=0.1)
+    image = tf.image.random_contrast(image, lower=0.75, upper=1.25)
+    image = tf.image.random_hue(image, max_delta=0.05)
   elif color_ordering == 2:
-    image = tf.image.random_contrast(image, lower=0.5, upper=1.5)
-    image = tf.image.random_hue(image, max_delta=0.1)
+    image = tf.image.random_contrast(image, lower=0.75, upper=1.25)
+    image = tf.image.random_hue(image, max_delta=0.05)
     image = tf.image.random_brightness(image, max_delta=32. / 255.)
-    image = tf.image.random_saturation(image, lower=0.5, upper=1.5)
+    image = tf.image.random_saturation(image, lower=0.75, upper=1.25)
   elif color_ordering == 3:
-    image = tf.image.random_hue(image, max_delta=0.1)
-    image = tf.image.random_saturation(image, lower=0.5, upper=1.5)
-    image = tf.image.random_contrast(image, lower=0.5, upper=1.5)
+    image = tf.image.random_hue(image, max_delta=0.05)
+    image = tf.image.random_saturation(image, lower=0.75, upper=1.25)
+    image = tf.image.random_contrast(image, lower=0.75, upper=1.25)
     image = tf.image.random_brightness(image, max_delta=32. / 255.)
   else:
     raise ValueError('color_ordering must be in [0, 3]')
@@ -48,7 +48,7 @@ def distort_color(image, color_ordering=0):
 
 def input_batch(mode):
   if mode == learn.ModeKeys.TRAIN:
-   pattern = os.path.join(TRAIN_DIR, '*.train')
+    pattern = os.path.join(TRAIN_DIR, '*.train')
   else:
     pattern = os.path.join(TRAIN_DIR, '*.validation')
 
@@ -72,7 +72,7 @@ def input_batch(mode):
   image = tf.image.decode_jpeg(features['image/encoded'], channels=CHANNELS)
 
   if image.dtype != tf.float32:
-      image = tf.image.convert_image_dtype(image, dtype=tf.float32)
+    image = tf.image.convert_image_dtype(image, dtype=tf.float32)
 
   image = tf.reshape(image, [HEIGHT, WIDTH, CHANNELS])
   image = apply_with_random_selector(image, lambda x, ordering: distort_color(x, ordering), num_cases=4)
@@ -103,4 +103,4 @@ with tf.Session() as sess:
 
   for epoch in range(EPOCHS):
     classifier.fit(input_fn=input_fn_train, steps=STEPS_TRAIN)
-    print classifier.evaluate(input_fn=input_fn_eval, steps=STEPS_EVAL)
+    classifier.evaluate(input_fn=input_fn_eval, steps=STEPS_EVAL)

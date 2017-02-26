@@ -18,30 +18,33 @@ def model_fn(features, labels, mode):
   x = repeat(x, 2, conv2d, 64, 3, 2, scope='conv2', activation_fn=tf.nn.tanh)
   x = tf.layers.max_pooling2d(inputs=x, pool_size=2, strides=2)
 
-  x = tf.reshape(x, [-1, 8 * 8 * 64])
+  x = tf.reshape(x, [-1, 16 * 16 * 64])
 
   with tf.name_scope('fc1'):
-    x = tf.layers.dense(inputs=x, units=1024, activation=tf.nn.tanh)
+    x = tf.layers.dense(inputs=x, units=2048, activation=tf.nn.tanh)
 
   x = tf.layers.dropout(inputs=x, rate=0.4, training=mode == learn.ModeKeys.TRAIN)
 
   with tf.name_scope('fc2'):
     x = tf.layers.dense(inputs=x, units=ARTISTS_LEN)
 
-  classes = tf.argmax(input=x, axis=1)
+  classes = tf.argmax(x, axis=1)
+  probabilities = tf.nn.softmax(x, name="softmax_tensor")
+
   loss = None
   accuracy = None
   train_op = None
 
   if mode == learn.ModeKeys.TRAIN or mode == learn.ModeKeys.EVAL:
-    x = tf.Print(x, [x], message="logits: ", summarize=ARTISTS_LEN)
+    #x = tf.Print(x, [x], message="logits: ", summarize=ARTISTS_LEN)
     one_hot_labels = tf.one_hot(indices=tf.cast(labels, tf.int32), depth=ARTISTS_LEN)
-    one_hot_labels = tf.Print(one_hot_labels, [one_hot_labels], message="one_hot_labels: ", summarize=ARTISTS_LEN)
+    #one_hot_labels = tf.Print(one_hot_labels, [one_hot_labels], message="one_hot_labels: ", summarize=ARTISTS_LEN)
 
     loss = tf.losses.softmax_cross_entropy(onehot_labels=one_hot_labels, logits=x)
 
     correct_prediction = tf.equal(classes, labels)
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+    accuracy = tf.Print(accuracy, [accuracy], message="accuracy: ")
 
   if mode == learn.ModeKeys.TRAIN:
     train_op = tf.contrib.layers.optimize_loss(loss=loss, global_step=tf.contrib.framework.get_global_step(), optimizer="Adam", learning_rate=LEARN_RATE)
@@ -50,7 +53,7 @@ def model_fn(features, labels, mode):
 
   with tf.name_scope('readout'):
     predictions = {
-      "probabilities": tf.nn.softmax(x, name="softmax_tensor"),
+      "probabilities": probabilities,
       "classes": classes
     }
 
