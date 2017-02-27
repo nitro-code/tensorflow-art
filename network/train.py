@@ -9,7 +9,7 @@ TRAIN_DIR = '/home/models/art/preprocessed'
 CHECKPOINTS_DIR = './../checkpoints'
 
 BATCH_SIZE = 32
-STEPS_TRAIN = 200
+STEPS_TRAIN = 100
 STEPS_EVAL = 10
 EPOCHS = 100000
 
@@ -89,7 +89,7 @@ def input_batch(mode):
   return image_batch, label_batch
 
 
-tf.logging.set_verbosity(tf.logging.INFO)
+#tf.logging.set_verbosity(tf.logging.INFO)
 
 with tf.Session() as sess:
   tf.global_variables_initializer().run()

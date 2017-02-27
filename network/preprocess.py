@@ -9,7 +9,7 @@ TARGET_DIR = "/home/models/art/preprocessed"
 
 TRAIN_EXTENSION = "train"
 VALIDATION_EXTENSION = "validation"
-VALIDATION_MOD = 100
+VALIDATION_MOD = 10000
 
 
 def process_artist(artist_dir, artist_number):
