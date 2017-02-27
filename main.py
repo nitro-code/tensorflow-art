@@ -3,12 +3,9 @@ from flask_cors import CORS, cross_origin
 import os
 import json
 import urllib
-from PIL import Image, ImageOps
-import StringIO
 import numpy as np
 from tensorflow.contrib import learn
-from network.model import model_fn
-from network.image import preprocess_image, ARTISTS, WIDTH, HEIGHT
+from network.model import model_fn, decode_jpeg, ARTISTS
 
 
 MODEL_URL = "http://nitro.ai/assets/models/art"
@@ -48,9 +45,6 @@ def assure_model():
   assure_model_file(MODEL_META_FILE)
   assure_model_file(MODEL_CHECKPOINT_FILE)
 
-def pil2array(pil_img):
-  return np.array(pil_img.getdata(), np.float32).reshape(pil_img.size[1], pil_img.size[0], 3)
-
 def decode_predictions(predictions, top=3):
   results = []
   predictions = list(predictions)
@@ -62,7 +56,6 @@ def decode_predictions(predictions, top=3):
     results.append(result)
 
   return results
-
 
 
 app = Flask(__name__)
@@ -89,13 +82,8 @@ def classify():
   file = request.files['file']
 
   if file:
-    image_jpeg = StringIO.StringIO(file.read())
-    image = preprocess_image(image_jpeg)
-    img_array = pil2array(image)
-    img_array_batch = np.expand_dims(img_array, axis=0)
+    input_fn_predict = lambda: decode_jpeg(file.read())
+    predictions = classifier.predict(input_fn=input_fn_predict)
 
-    input_fn = lambda: img_array_batch
-    predictions = classifier.predict(input_fn=input_fn)
     result = decode_predictions(predictions)
-
     return json.dumps(result, cls=NumpyEncoder)

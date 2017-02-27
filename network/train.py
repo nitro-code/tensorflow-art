@@ -2,7 +2,7 @@ import os
 import tensorflow as tf
 from tensorflow.contrib import learn
 from tensorflow.python.ops import control_flow_ops
-from model import model_fn, WIDTH, HEIGHT, CHANNELS
+from model import model_fn, decode_jpeg, WIDTH, HEIGHT, CHANNELS
 
 
 TRAIN_DIR = '/home/models/art/preprocessed'
@@ -69,20 +69,17 @@ def input_batch(mode):
       })
 
   label = features['image/label']
-  image = tf.image.decode_jpeg(features['image/encoded'], channels=CHANNELS)
+  image_jpeg = features['image/encoded']
 
-  if image.dtype != tf.float32:
-    image = tf.image.convert_image_dtype(image, dtype=tf.float32)
-
-  image = tf.reshape(image, [HEIGHT, WIDTH, CHANNELS])
-  image = apply_with_random_selector(image, lambda x, ordering: distort_color(x, ordering), num_cases=4)
+  image = decode_jpeg(image_jpeg)
+  distorted_image = apply_with_random_selector(image, lambda x, ordering: distort_color(x, ordering), num_cases=4)
 
   num_threads = 4
   min_after_dequeue = BATCH_SIZE * 4
   capacity = min_after_dequeue + num_threads * BATCH_SIZE
 
   image_batch, label_batch = tf.train.shuffle_batch(
-      [image, label],
+      [distorted_image, label],
       num_threads=num_threads,
       batch_size=BATCH_SIZE,
       min_after_dequeue=min_after_dequeue,

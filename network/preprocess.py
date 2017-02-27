@@ -1,7 +1,7 @@
 import os
 import cStringIO
 import tensorflow as tf
-from image import preprocess_image, WIDTH, HEIGHT, CHANNELS
+from model import decode_jpeg, WIDTH, HEIGHT, CHANNELS
 
 
 SOURCE_DIR = "/home/models/art/original"
@@ -31,40 +31,31 @@ def process_artist(artist_dir, artist_number):
         else:
           extension = TRAIN_EXTENSION
 
-        write_artist_tfrecord(artist_number, artist_dir, image_number, image_path, extension)
-        image_number += 1
+        with file(image_path) as f:
+          image = f.read()
+          filename = os.path.basename(image_path)
+          write_artist_tfrecord(artist_dir, artist_number, image_number, filename, extension, image)
+          image_number += 1
 
     return True
 
-def write_artist_tfrecord(artist_number, artist_dir, image_number, image_path, extension):
-  filename = os.path.basename(image_path)
-  output_file = os.path.join(TARGET_DIR, '{}_{}.{}'.format(artist_dir, image_number, extension))
+def write_artist_tfrecord(artist_dir, artist_number, image_number, filename, extension, image):
+  output_path = os.path.join(TARGET_DIR, '{}_{}.{}'.format(artist_dir, image_number, extension))
 
-  print "writing tfrecord for artist {}, label {} and image {} into {}".format(artist_dir, artist_number, image_number, output_file)
-
-  writer = tf.python_io.TFRecordWriter(output_file)
-  image = preprocess_image(image_path)
-  image_jpeg = cStringIO.StringIO()
-  image.save(image_jpeg, "JPEG")
-
-  example = convert_to_example(filename, image_jpeg, artist_number, filename, image.height, image.width)
+  print "writing tfrecord for artist {}, label {} and image {} into {}".format(artist_dir, artist_number, image_number, output_path)
+  writer = tf.python_io.TFRecordWriter(output_path)
+  example = convert_to_example(filename, image, artist_number)
   writer.write(example.SerializeToString())
   writer.close()
 
-def convert_to_example(filename, image_buffer, label, text, height, width):
-  colorspace = 'RGB'
-  channels = CHANNELS
-  image_format = 'JPEG'
-  image_data = image_buffer.getvalue()
-
-  example = tf.train.Example(features=tf.train.Features(feature={
-      'image/height': _int64_feature(height),
-      'image/width': _int64_feature(width),
-      'image/channels': _int64_feature(channels),
+def convert_to_example(filename, image, label):
+  return tf.train.Example(features=tf.train.Features(feature={
+      'image/height': _int64_feature(HEIGHT),
+      'image/width': _int64_feature(WIDTH),
+      'image/channels': _int64_feature(CHANNELS),
       'image/label': _int64_feature(label),
       'image/filename': _bytes_feature(tf.compat.as_bytes(filename)),
-      'image/encoded': _bytes_feature(tf.compat.as_bytes(image_data))}))
-  return example
+      'image/encoded': _bytes_feature(tf.compat.as_bytes(image))}))
 
 def _int64_feature(value):
   if not isinstance(value, list): value = [value]
