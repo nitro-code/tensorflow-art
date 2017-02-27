@@ -5,7 +5,7 @@ import json
 import urllib
 import numpy as np
 from tensorflow.contrib import learn
-from network.model import model_fn, decode_jpeg, ARTISTS
+from network.model import model_fn, decode_jpeg, resize_image, ARTISTS
 
 
 MODEL_URL = "http://nitro.ai/assets/models/art"
@@ -82,7 +82,8 @@ def classify():
   file = request.files['file']
 
   if file:
-    input_fn_predict = lambda: decode_jpeg(file.read())
+    image = decode_jpeg(file.read())
+    input_fn_predict = lambda: resize_image(image)
     predictions = classifier.predict(input_fn=input_fn_predict)
 
     result = decode_predictions(predictions)

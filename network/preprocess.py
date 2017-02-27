@@ -9,7 +9,7 @@ TARGET_DIR = "/home/models/art/preprocessed"
 
 TRAIN_EXTENSION = "train"
 VALIDATION_EXTENSION = "validation"
-VALIDATION_MOD = 10000
+VALIDATION_MOD = 100
 
 
 def process_artist(artist_dir, artist_number):
@@ -19,7 +19,6 @@ def process_artist(artist_dir, artist_number):
   if not image_files:
     return False
   else:
-    os.mkdir(os.path.join(TARGET_DIR, artist_dir))
     image_number = 0
 
     for image_file in image_files:
