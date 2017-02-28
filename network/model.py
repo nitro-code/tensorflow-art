@@ -38,7 +38,7 @@ def model_fn(features, labels, mode):
   x = tf.reshape(x, [-1, 8 * 8 * 64])
 
   with tf.name_scope('fc1'):
-    x = tf.layers.dense(inputs=x, units=2048, activation=tf.nn.tanh)
+    x = tf.layers.dense(inputs=x, units=1024, activation=tf.nn.tanh)
 
   x = tf.layers.dropout(inputs=x, rate=0.4, training=mode == learn.ModeKeys.TRAIN)
 

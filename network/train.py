@@ -9,7 +9,7 @@ TRAIN_DIR = '/home/models/art/preprocessed'
 CHECKPOINTS_DIR = './../checkpoints'
 
 BATCH_SIZE = 128
-STEPS_TRAIN = 1000
+STEPS_TRAIN = 10
 STEPS_EVAL = 10
 EPOCHS = 100000
 
@@ -46,6 +46,25 @@ def distort_color(image, color_ordering=0):
 
   return tf.clip_by_value(image, 0.0, 1.0)
 
+def distort_image(image):
+  image = apply_with_random_selector(image, lambda x, ordering: distort_color(x, ordering), num_cases=4)
+
+  rand = tf.random_uniform([], maxval=0.1, dtype=tf.float32)
+  image = tf.contrib.image.transform(
+      image,
+      [1, rand, rand, rand, 1, rand, 0, 0])
+
+  height_offset = tf.random_uniform([], maxval=0.4, dtype=tf.float32) - 0.2
+  width_offset = tf.random_uniform([], maxval=0.4, dtype=tf.float32) - 0.2
+  image = tf.image.extract_glimpse(
+    tf.expand_dims(image, 0),
+    [HEIGHT, WIDTH],
+    tf.expand_dims([height_offset, width_offset], 0),
+    normalized=True,
+    centered=True)
+
+  return image
+
 def input_batch(mode):
   if mode == learn.ModeKeys.TRAIN:
     pattern = os.path.join(TRAIN_DIR, '*.train')
@@ -68,21 +87,14 @@ def input_batch(mode):
           'image/encoded': tf.FixedLenFeature([], tf.string)
       })
 
+  height = features['image/height']
+  width = features['image/width']
   label = features['image/label']
   image_jpeg = features['image/encoded']
 
   image = decode_jpeg(image_jpeg)
-  image = apply_with_random_selector(image, lambda x, ordering: distort_color(x, ordering), num_cases=4)
   image = resize_image(image)
-
-  height_offset = tf.random_uniform([], maxval=0.8, dtype=tf.float32) - 0.4
-  width_offset = tf.random_uniform([], maxval=0.8, dtype=tf.float32) - 0.4
-  image = tf.image.extract_glimpse(
-      tf.expand_dims(image, 0),
-      [HEIGHT, WIDTH],
-      tf.expand_dims([height_offset, width_offset], 0),
-      normalized=True,
-      centered=True)
+  image = distort_image(image)
 
   num_threads = 4
   min_after_dequeue = BATCH_SIZE * 4
