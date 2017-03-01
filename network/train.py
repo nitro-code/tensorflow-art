@@ -9,8 +9,8 @@ TRAIN_DIR = '/home/models/art/preprocessed'
 CHECKPOINTS_DIR = './../checkpoints'
 
 BATCH_SIZE = 128
-STEPS_TRAIN = 10
-STEPS_EVAL = 10
+STEPS_TRAIN = 100
+STEPS_EVAL = 4
 EPOCHS = 100000
 
 
@@ -49,7 +49,7 @@ def distort_color(image, color_ordering=0):
 def distort_image(image):
   image = apply_with_random_selector(image, lambda x, ordering: distort_color(x, ordering), num_cases=4)
 
-  rand = tf.random_uniform([], maxval=0.1, dtype=tf.float32)
+  rand = tf.random_uniform([], maxval=0.2, dtype=tf.float32) - 0.1
   image = tf.contrib.image.transform(
       image,
       [1, rand, rand, rand, 1, rand, 0, 0])
