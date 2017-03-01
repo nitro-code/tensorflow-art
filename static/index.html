@@ -6,16 +6,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="index, follow, noarchive" />
     <title>Artwork Classifier</title>
-    <link href="https://fonts.googleapis.com/css?family=Muli" rel="stylesheet"> 
-    <link rel="stylesheet" href="/static/css/lib/bootstrap.min.css">
-    <link rel="stylesheet" href="/static/css/lib/jquery.fileupload.css">
+    <link href="https://fonts.googleapis.com/css?family=Muli" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/static/css/jquery/jquery.fileupload.css">
     <link rel="stylesheet" href="/static/css/screen.css">
-    <script src="/static/js/lib/jquery-3.1.1.min.js"></script>
-    <script src="/static/js/lib/jquery.ui.widget.js"></script>
-    <script src="/static/js/lib/jquery.iframe-transport.js"></script>
-    <script src="/static/js/lib/jquery.fileupload.js"></script>
-    <script src="/static/js/lib/progressbar.min.js"></script>
-    <script src="/static/js/lib/scrollreveal.min.js"></script>
+    <script src="/static/js/jquery/jquery-3.1.1.min.js"></script>
+    <script src="/static/js/jquery/jquery.ui.widget.js"></script>
+    <script src="/static/js/jquery/jquery.iframe-transport.js"></script>
+    <script src="/static/js/jquery/jquery.fileupload.js"></script>
+    <script src="/static/js/progressbar/progressbar.min.js"></script>
+    <script src="/static/js/scrollreveal/scrollreveal.min.js"></script>
     <script src="/static/js/screen.js"></script>
   </head>
   <body>
@@ -41,7 +42,7 @@
             <div class="panel panel-default">
               <div class="panel-body">
                 <span class="btn btn-success fileinput-button">
-                  <span>Select Artwork Image File</span>
+                  <i class="fa fa-upload" aria-hidden="true"></i> <span>Select Artwork Image File</span>
                   <input id="fileupload" type="file" name="file" accept="image/jpeg"/>
                 </span>
                 <div id="progress" class="progress">
@@ -67,7 +68,7 @@
         <div class="col-xs-12">
           <div class="reveal">
             <section class="explanation">
-              <p>The classifier is based on a deep neural network (DNN) implemented and trained with <a href="https://www.tensorflow.org">Tensorflow</a>.
+              <p>The classifier is based on a deep neural network implemented and trained with <a href="https://www.tensorflow.org">Tensorflow</a>.
               The model architecture is constituted by a multi-layer <a href="https://en.wikipedia.org/wiki/Convolutional_neural_network">Convolutional Neural Network</a>, which is followed by a fully connected layer and completed with a <a href="https://en.wikipedia.org/wiki/Softmax_function">Softmax Readout Layer</a>.</p>
               <p>Training was done based on a <a href="https://en.wikipedia.org/wiki/Cross_entropy">Cross-Entropy</a> error function.</p>
             </section>
@@ -78,8 +79,8 @@
         <div class="col-xs-12">
           <div class="reveal">
             <footer class="text-right">
-              <a href="https://github.com/uwol">uwol</a>
-              | <a href="https://github.com/sebdei">sebdei</a>
+              <i class="fa fa-github" aria-hidden="true"></i> <a href="https://github.com/uwol">uwol</a>
+              | <i class="fa fa-github" aria-hidden="true"></i> <a href="https://github.com/sebdei">sebdei</a>
               | <a href="http://nitro.ai">nitro</a>
             </footer>
           </div>
