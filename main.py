@@ -4,6 +4,7 @@ import os
 import json
 import urllib
 import numpy as np
+import tensorflow as tf
 from tensorflow.contrib import learn
 from network.model import model_fn, decode_jpeg, resize_image, ARTISTS
 
@@ -79,12 +80,12 @@ def send_css(path):
 
 @app.route('/api/v1/classify', methods=['POST'])
 def classify():
-  file = request.files['file']
+  with tf.Session() as sess:
+    file = request.files['file']
 
-  if file:
-    image = decode_jpeg(file.read())
-    input_fn_predict = lambda: resize_image(image)
-    predictions = classifier.predict(input_fn=input_fn_predict)
+    if file:
+      input_fn_predict = lambda: resize_image(decode_jpeg(file.read()))
+      predictions = classifier.predict(input_fn=input_fn_predict)
 
-    result = decode_predictions(predictions)
-    return json.dumps(result, cls=NumpyEncoder)
+      result = decode_predictions(predictions)
+      return json.dumps(result, cls=NumpyEncoder)
