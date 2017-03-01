@@ -5,95 +5,86 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="index, follow, noarchive" />
-    <title>Deep Neural Network Artwork Classifier</title>
-    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/static/css/jquery.fileupload.css">
-    <script src="/static/js/jquery-3.1.1.min.js"></script>
-    <script src="/static/js/jquery.ui.widget.js"></script>
-    <script src="/static/js/jquery.iframe-transport.js"></script>
-    <script src="/static/js/jquery.fileupload.js"></script>
+    <title>Artwork Classifier</title>
+    <link href="https://fonts.googleapis.com/css?family=Muli" rel="stylesheet"> 
+    <link rel="stylesheet" href="/static/css/lib/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/lib/jquery.fileupload.css">
+    <link rel="stylesheet" href="/static/css/screen.css">
+    <script src="/static/js/lib/jquery-3.1.1.min.js"></script>
+    <script src="/static/js/lib/jquery.ui.widget.js"></script>
+    <script src="/static/js/lib/jquery.iframe-transport.js"></script>
+    <script src="/static/js/lib/jquery.fileupload.js"></script>
+    <script src="/static/js/lib/progressbar.min.js"></script>
+    <script src="/static/js/lib/scrollreveal.min.js"></script>
+    <script src="/static/js/screen.js"></script>
   </head>
   <body>
     <div class="container">
-      <h1>Deep Neural Network Artwork Classifier</h1>
-      <hr />
+      <div class="row">
+        <div class="col-xs-12">
+          <h1>Artwork Classifier</h1>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="reveal">
+            <section class="introduction">
+              <p>This is an artwork classifier, which determines the artist of a painting based on a <a href="https://en.wikipedia.org/wiki/Deep_learning">deep neural network</a> (DNN). The neural network has been trainined with paintings of approximately 200 well-known artists such as Claude Monet and Pablo Picasso.</p>
+            </section>
+          </div>
+        </div>
+      </div>
       <div class="row">
         <div class="col-sm-6">
-          <h3>Artwork Image Upload</h3>
-          <div class="panel panel-default">
-            <div class="panel-body">
-              <span class="btn btn-success fileinput-button">
-                <span>Select Artwork Image File</span>
-                <input id="fileupload" type="file" name="file" accept="image/jpeg"/>
-              </span>
+          <div class="reveal">
+            <h3>Image Upload</h3>
+            <div class="panel panel-default">
+              <div class="panel-body">
+                <span class="btn btn-success fileinput-button">
+                  <span>Select Artwork Image File</span>
+                  <input id="fileupload" type="file" name="file" accept="image/jpeg"/>
+                </span>
+                <div id="progress" class="progress">
+                  <div class="progress-bar progress-bar-success"></div>
+                </div>
+              </div>
             </div>
+            <div id="files" class="files"></div>
           </div>
-          <div id="progress" class="progress">
-            <div class="progress-bar progress-bar-success"></div>
-          </div>
-          <div id="files" class="files"></div>
         </div>
         <div class="col-sm-6">
-          <h3>Artwork Classification Result</h3>
-          <div class="panel panel-default">
-            <div class="panel-body">
-              <div id="result"></div>
+          <div class="reveal">
+            <h3>Classification Result</h3>
+            <div class="panel panel-default">
+              <div class="panel-body">
+                <div id="result"></div>
+              </div>
             </div>
           </div>
         </div>
       </div>
       <div class="row">
         <div class="col-xs-12">
-          <footer class="text-right">
-            <a href="http://nitro.ai">nitro</a>
-            | <a href="http://nitro.ai/en/imprint">imprint</a>
-          </footer>
+          <div class="reveal">
+            <section class="explanation">
+              <p>The classifier is based on a deep neural network (DNN) implemented and trained with <a href="https://www.tensorflow.org">Tensorflow</a>.
+              The model architecture is constituted by a multi-layer <a href="https://en.wikipedia.org/wiki/Convolutional_neural_network">Convolutional Neural Network</a>, which is followed by a fully connected layer and completed with a <a href="https://en.wikipedia.org/wiki/Softmax_function">Softmax Readout Layer</a>.</p>
+              <p>Training was done based on a <a href="https://en.wikipedia.org/wiki/Cross_entropy">Cross-Entropy</a> error function.</p>
+            </section>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="reveal">
+            <footer class="text-right">
+              <a href="https://github.com/uwol">uwol</a>
+              | <a href="https://github.com/sebdei">sebdei</a>
+              | <a href="http://nitro.ai">nitro</a>
+            </footer>
+          </div>
         </div>
       </div>
     </div>
-    <script>
-      $(function() {
-        $('#fileupload').fileupload({
-          url: '/api/v1/classify',
-          dataType: 'json',
-          progressall: function(e, data) {
-            var progress = parseInt(data.loaded / data.total * 100, 10);
-            $('#progress .progress-bar').css('width', progress + '%');
-          },
-          done: function (e, data) {
-            $('#result').empty();
-            $('#progress .progress-bar').css('width', '0%');
-
-            $.each(data.result, function(index, image) {
-              $.each(image, function(index, artist) {
-                var percent = Math.round(artist.probability * 1000) / 10;
-                $('<p/>').text(artist.description + ': ' + percent + ' %').appendTo('#result');
-              });
-            });
-          }
-        })
-        .on('change', function(e){
-          $('#files').empty();
-          $('#result').empty();
-
-          var files = e.target.files;
-          var f = files[0];
-          var reader = new FileReader();
-
-          reader.onload = (function(file) {
-            return function(e) {
-              var img = $('<img>');
-              img.attr('src', e.target.result);
-              img.attr('title', file.name);
-              img.addClass('img-responsive');
-              img.appendTo('#files');
-            };
-          })(f);
-
-          reader.readAsDataURL(f);
-        })
-        .prop('disabled', !$.support.fileInput).parent().addClass($.support.fileInput ? undefined : 'disabled');
-      });
-    </script>
   </body>
 </html>

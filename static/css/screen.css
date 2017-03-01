@@ -1,0 +1,39 @@
+html,
+body {
+	font-size: 1em;
+	font-family: 'Muli', sans-serif;
+}
+
+hr {
+	margin-top: 1em;
+	margin-bottom: 1em;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+#progress {
+	display: none;
+}
+
+.progress, .confidence {
+  margin-top: 1em;
+  margin-bottom: 0;
+}
+
+.introduction {
+	margin-top: 1em;
+	margin-bottom: 2em;
+}
+
+.explanation {
+	margin-top: 2em;
+	margin-bottom: 1em;
+}
+
+footer {
+  padding-top: 1em;
+  padding-bottom: 4em;
+}
