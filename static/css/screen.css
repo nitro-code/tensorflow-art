@@ -39,17 +39,27 @@ p {
 	border-radius: 0;
 }
 
+.painting-box {
+	text-align: center;
+}
+
+.img-painting {
+	height: 200px;
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
 #progress {
 	display: none;
 }
 
 #progress .progress-bar {
-    background: #000;
+  background: #000;
 }
 
 .progress, .confidence {
   margin-top: 1em;
-  margin-bottom: 0;
+  margin-bottom: 1em;
 }
 
 .introduction {
@@ -63,8 +73,8 @@ p {
 }
 
 footer {
-  padding-top: 1em;
-  padding-bottom: 4em;
+  padding-top: 2em;
+  padding-bottom: 6em;
 }
 
 footer a {

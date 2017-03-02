@@ -18,6 +18,8 @@ MODEL_META_FILE = "model.ckpt.meta"
 
 CHECKPOINTS_DIR = './checkpoints'
 
+IMAGES = ['static/img/Monet-Jardin_a_Sainte-Adresse.jpg', 'static/img/Picasso-Figure_dans_un_Fauteuil.jpg']
+
 
 class NumpyEncoder(json.JSONEncoder):
   def default(self, obj):
@@ -58,6 +60,14 @@ def decode_predictions(predictions, top=3):
 
   return results
 
+def classify(file):
+  with tf.Session() as sess:
+    input_fn_predict = lambda: resize_image(decode_jpeg(file.read()))
+    predictions = classifier.predict(input_fn=input_fn_predict)
+    result = decode_predictions(predictions)
+    return json.dumps(result, cls=NumpyEncoder)
+
+
 
 app = Flask(__name__)
 CORS(app)
@@ -78,14 +88,15 @@ def send_js(path):
 def send_css(path):
   return send_from_directory('css', path)
 
+@app.route('/api/v1/classify', methods=['GET'])
+def classifyOnGet():
+  id = int(request.args.get('id'))
+  file_path = IMAGES[id]
+  file = open(file_path, "r")
+  return classify(file)
+
 @app.route('/api/v1/classify', methods=['POST'])
-def classify():
-  with tf.Session() as sess:
-    file = request.files['file']
-
-    if file:
-      input_fn_predict = lambda: resize_image(decode_jpeg(file.read()))
-      predictions = classifier.predict(input_fn=input_fn_predict)
-
-      result = decode_predictions(predictions)
-      return json.dumps(result, cls=NumpyEncoder)
+def classifyOnPost():
+  file = request.files['file']
+  if file:
+    return classify(file)

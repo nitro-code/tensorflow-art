@@ -1,7 +1,23 @@
+var classifyUrl = '/api/v1/classify';
+
+function resetFileUpload(){
+  $('#progress .progress-bar').css('width', '0%');
+  $('#progress').hide();
+  $('#files').empty();
+}
+
+function startFileUpload(){
+  $('#files').empty();
+  $('#progress').show();
+}
+
+function resetClassification(){
+  $('#result').empty();
+}
+
 function animateConfidence(){
   $('.confidence').each(function(){
     var progress = $(this);
-
     var percent = progress.data('percent');
 
     var bar = new ProgressBar.Line(this, {
@@ -25,63 +41,86 @@ function animateConfidence(){
   });
 }
 
+function printClassificationResult(data){
+  $.each(data, function(index, image) {
+    $.each(image, function(index, artist) {
+      var percent = Math.round(artist.probability * 1000) / 10;
+      var description = artist.description.toUpperCase();
+
+      $('<p/>').text(description).appendTo('#result');
+
+      var confidence = $('<div>');
+      confidence.addClass('confidence');
+      confidence.data('percent', percent);
+      confidence.appendTo('#result');
+    });
+  });
+
+  animateConfidence();
+}
+
+function onClassifyClick(id){
+  resetFileUpload();
+  resetClassification();
+
+  $.ajax({
+    url: classifyUrl,
+    context: document.body,
+    data: {'id': id}
+  }).done(function(data) {
+    var json = $.parseJSON(data);
+    printClassificationResult(json);
+  });
+}
+
 
 $(document).ready(function(){
   window.sr = ScrollReveal();
   sr.reveal('.reveal');
 });
 
-
 $(document).ready(function(){
   $('#fileupload').fileupload({
-    url: '/api/v1/classify',
+    url: classifyUrl,
     dataType: 'json',
+    send: function (e, data) {
+      resetClassification();
+      startFileUpload();
+
+      var f = data.files[0];
+      var reader = new FileReader();
+
+      reader.onload = (function(file) {
+        return function(e) {
+          var img = $('<img>');
+          img.attr('src', e.target.result);
+          img.attr('title', file.name);
+          img.addClass('img-painting');
+          img.addClass('center-block');
+          img.appendTo('#files');
+        };
+      })(f);
+
+      reader.readAsDataURL(f);
+    },
     progressall: function(e, data) {
       var progress = parseInt(data.loaded / data.total * 100, 10);
       $('#progress .progress-bar').css('width', progress + '%');
     },
     done: function (e, data) {
-      $('#result').empty();
-      $('#progress').hide();
-      $('#progress .progress-bar').css('width', '0%');
-
-      $.each(data.result, function(index, image) {
-        $.each(image, function(index, artist) {
-          var percent = Math.round(artist.probability * 1000) / 10;
-          var description = artist.description.toUpperCase();
-
-          $('<p/>').text(description).appendTo('#result');
-
-          var confidence = $('<div>');
-          confidence.addClass('confidence');
-          confidence.data('percent', percent);
-          confidence.appendTo('#result');
-        });
-      });
-
-      animateConfidence();
+      resetFileUpload();
+      printClassificationResult(data.result);
     }
   })
-  .on('change', function(e){
-    $('#files').empty();
-    $('#result').empty();
-    $('#progress').show();
-
-    var files = e.target.files;
-    var f = files[0];
-    var reader = new FileReader();
-
-    reader.onload = (function(file) {
-      return function(e) {
-        var img = $('<img>');
-        img.attr('src', e.target.result);
-        img.attr('title', file.name);
-        img.addClass('img-responsive');
-        img.appendTo('#files');
-      };
-    })(f);
-
-    reader.readAsDataURL(f);
-  })
   .prop('disabled', !$.support.fileInput).parent().addClass($.support.fileInput ? undefined : 'disabled');
+});
+
+$(document).ready(function(){
+  $('#btn-painting-1').on('click', function(){
+    onClassifyClick(0);
+  });
+
+  $('#btn-painting-2').on('click', function(){
+    onClassifyClick(1);
+  });
 });
