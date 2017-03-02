@@ -41,3 +41,8 @@ footer {
   padding-top: 1em;
   padding-bottom: 4em;
 }
+
+footer a {
+	margin-left: 0.25em;
+	margin-right: 0.25em;
+}

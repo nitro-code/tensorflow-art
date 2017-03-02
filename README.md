@@ -33,9 +33,6 @@ Train Model
 ===========
 
 ```
-$ wget -r --level=3 --accept=jpg,jpeg
-$ find . -name 's*' -exec rm {} \;
-
 $ python preprocess.py
 $ python train.py
 ```
