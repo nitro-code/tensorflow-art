@@ -1,7 +1,23 @@
 html,
 body {
+	font-family: "Merriweather", serif;
+  font-weight: 300;
 	font-size: 1em;
-	font-family: 'Muli', sans-serif;
+	background-color: #fff;
+	color: #000;
+}
+
+a {
+	text-decoration: underline;
+}
+
+a, a:hover {
+	color: #000;
+}
+
+h1,h2,h3,h4,h5,h6 {
+	font-family: "Lato", sans-serif;
+  font-weight: 700;
 }
 
 body {
@@ -18,8 +34,17 @@ p {
 	margin-bottom: 0.5em;
 }
 
+.panel.panel-default {
+	border-color: #000;
+	border-radius: 0;
+}
+
 #progress {
 	display: none;
+}
+
+#progress .progress-bar {
+    background: #000;
 }
 
 .progress, .confidence {

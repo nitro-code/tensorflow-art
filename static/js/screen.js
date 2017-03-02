@@ -5,6 +5,7 @@ function animateConfidence(){
     var percent = progress.data('percent');
 
     var bar = new ProgressBar.Line(this, {
+      color: '#000',
       strokeWidth: 4,
       easing: 'easeInOut',
       duration: 1400,
@@ -29,6 +30,7 @@ $(document).ready(function(){
   window.sr = ScrollReveal();
   sr.reveal('.reveal');
 });
+
 
 $(document).ready(function(){
   $('#fileupload').fileupload({
