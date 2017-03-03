@@ -1,13 +1,15 @@
 var classifyUrl = '/api/v1/classify';
 
-function resetFileUpload(){
+function resetFileProgress(){
   $('#progress .progress-bar').css('width', '0%');
   $('#progress').hide();
+}
+
+function resetFiles(){
   $('#files').empty();
 }
 
 function startFileUpload(){
-  $('#files').empty();
   $('#progress').show();
 }
 
@@ -60,7 +62,8 @@ function printClassificationResult(data){
 }
 
 function onClassifyClick(id){
-  resetFileUpload();
+  resetFileProgress();
+  resetFiles();
   resetClassification();
 
   $.ajax({
@@ -84,6 +87,7 @@ $(document).ready(function(){
     url: classifyUrl,
     dataType: 'json',
     send: function (e, data) {
+      resetFiles();
       resetClassification();
       startFileUpload();
 
@@ -108,7 +112,7 @@ $(document).ready(function(){
       $('#progress .progress-bar').css('width', progress + '%');
     },
     done: function (e, data) {
-      resetFileUpload();
+      resetFileProgress();
       printClassificationResult(data.result);
     }
   })
