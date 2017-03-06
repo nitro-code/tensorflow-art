@@ -8,7 +8,7 @@ from model import model_fn, decode_jpeg, resize_image, WIDTH, HEIGHT, CHANNELS
 TRAIN_DIR = '/home/models/art/preprocessed'
 CHECKPOINTS_DIR = './../checkpoints'
 
-BATCH_SIZE = 128
+BATCH_SIZE = 32
 STEPS_TRAIN = 100
 STEPS_EVAL = 4
 EPOCHS = 100000
@@ -51,7 +51,7 @@ def distort_image(image, height, width):
   with tf.name_scope('distort_image'):
     image = apply_with_random_selector(image, lambda x, ordering: distort_color(x, ordering), num_cases=4)
 
-    rand = tf.random_uniform([], maxval=0.2, dtype=tf.float32) - 0.1
+    rand = tf.random_uniform([], minval=-0.1, maxval=0.1, dtype=tf.float32)
     image = tf.contrib.image.transform(image, [1, rand, rand, rand, 1, rand, 0, 0])
 
     glimpse_min_height = tf.cast(tf.multiply(tf.cast(height, tf.float32), tf.constant(0.8)), tf.int64)

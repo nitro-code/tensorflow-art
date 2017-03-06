@@ -1,14 +1,14 @@
 import tensorflow as tf
 from tensorflow.contrib import learn
-from tensorflow.contrib.layers import conv2d, dropout, repeat
+from tensorflow.contrib.layers import convolution2d, dropout, repeat
 from tensorflow.contrib.learn.python.learn.estimators import model_fn as model_fn_lib
 from tensorflow.contrib.learn.python.learn.estimators import metric_key
 
 
-ARTISTS = ['abrulloff', 'alekseev', 'almatadema', 'altdorfer', 'altman', 'angelico', 'barth', 'bellini', 'bonnard', 'borisov-musatov', 'bosch', 'braque', 'briullov', 'bruegel', 'burne-jones', 'campin', 'carpaccio', 'cezanne', 'chagall', 'cimabue', 'corot', 'correggio', 'cranach', 'cross', 'dali', 'daumier', 'david', 'davinci', 'degas', 'delacroix', 'dobuzhinsky', 'duccio', 'duchamp', 'durer', 'ernst', 'eyck', 'fabriano', 'fouquet', 'gagarin', 'gainsborough', 'gauguin', 'ghirlandao', 'giotto', 'gossaert', 'goya', 'grosz', 'hals', 'hay', 'heemskerch', 'hogarth', 'holbein', 'huntwh', 'ingres', 'kandinsky', 'klee', 'korovin', 'kramskoy', 'lebedev', 'levitan', 'lippi', 'lorenzetti', 'mantegna', 'martini', 'matisse', 'michelangelo', 'millais', 'miro', 'modigliani', 'monet', 'nesterov', 'orlovsky', 'ostroumova', 'patinir', 'perugino', 'picabia', 'picasso', 'piero', 'pissaro', 'pointillism', 'polenov', 'pollock', 'raphael', 'rembrandt', 'renoir', 'repin', 'rossetti', 'rubens', 'savrasov', 'schongauer', 'scorel', 'serov', 'seurat', 'shishkin', 'signac', 'signorelli', 'somov', 'surikov', 'teniers', 'tissot', 'turner', 'vandyck', 'vangogh', 'vasnetsov', 'venetsianov', 'vereshchagin', 'vermeer', 'vrubel', 'vuillard', 'watteau', 'weyden', 'whistler', 'zubov']
+ARTISTS = ['cezanne', 'davinci', 'delacroix', 'kandinsky', 'klee', 'monet', 'picasso', 'pollock', 'rembrandt', 'renoir', 'turner', 'vandyck', 'vangogh', 'vermeer']
 
-WIDTH = 512
-HEIGHT = 512
+WIDTH = 1000
+HEIGHT = 1000
 CHANNELS = 3
 
 LEARN_RATE = 1e-3
@@ -29,11 +29,9 @@ def model_fn(features, labels, mode):
   x = tf.reshape(features, [-1, HEIGHT, WIDTH, CHANNELS])
   tf.summary.image('images', x, 4)
 
-  x = repeat(x, 2, conv2d, 32, 3, 2, scope='conv1', activation_fn=tf.nn.tanh)
-  x = tf.layers.max_pooling2d(inputs=x, pool_size=2, strides=2)
-
-  x = repeat(x, 2, conv2d, 64, 3, 2, scope='conv2', activation_fn=tf.nn.tanh)
-  x = tf.layers.max_pooling2d(inputs=x, pool_size=2, strides=2)
+  x = convolution2d(inputs=x, num_outputs=16, kernel_size=5, stride=5, padding='SAME', activation_fn=tf.nn.tanh, scope='conv1')
+  x = convolution2d(inputs=x, num_outputs=32, kernel_size=5, stride=5, padding='SAME', activation_fn=tf.nn.tanh, scope='conv2')
+  x = convolution2d(inputs=x, num_outputs=64, kernel_size=5, stride=5, padding='SAME', activation_fn=tf.nn.tanh, scope='conv3')
 
   x = tf.reshape(x, [-1, 8 * 8 * 64])
 
