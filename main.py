@@ -68,7 +68,6 @@ def classify(file):
     return json.dumps(result, cls=NumpyEncoder)
 
 
-
 app = Flask(__name__)
 CORS(app)
 

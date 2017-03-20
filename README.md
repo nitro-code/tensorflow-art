@@ -11,6 +11,7 @@ which is followed by a fully connected layer and completed with a [softmax reado
 Training was done based on a [cross-entropy](https://en.wikipedia.org/wiki/Cross_entropy) error function.
 
 
+
 Install Dependencies
 ====================
 
