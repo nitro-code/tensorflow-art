@@ -11,7 +11,7 @@ from tensorflow.contrib import learn
 from network.model import model_fn, decode_jpeg, resize_image, ARTISTS
 
 
-MODEL_URL = "http://nitro.ai/assets/models/art"
+MODEL_URL = "http://assets.nitro.ai/models/art"
 
 CHECKPOINT_FILE = "checkpoint"
 MODEL_CHECKPOINT_FILE = "model.ckpt.data-00000-of-00001"
