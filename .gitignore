@@ -1,4 +1,3 @@
-checkpoints/checkpoint
-checkpoints/model.ckpt*
+.DS_Store
 venv
 *.pyc

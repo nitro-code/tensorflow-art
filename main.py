@@ -11,8 +11,6 @@ from tensorflow.contrib import learn
 from network.model import model_fn, decode_jpeg, resize_image, ARTISTS
 
 
-MODEL_URL = "http://assets.nitroventures.de/tensorflow-art/models"
-
 CHECKPOINT_FILE = "checkpoint"
 MODEL_CHECKPOINT_FILE = "model.ckpt.data-00000-of-00001"
 MODEL_INDEX_FILE = "model.ckpt.index"
@@ -29,26 +27,6 @@ class NumpyEncoder(json.JSONEncoder):
     elif isinstance(obj, np.floating): return float(obj)
     elif isinstance(obj, np.ndarray): return obj.tolist()
     else: return super(NumpyEncoder, self).default(obj)
-
-def assure_checkpoints_dir():
-  if not os.path.isdir(CHECKPOINTS_DIR):
-    os.mkdir(CHECKPOINTS_DIR)
-
-def assure_model_file(model_file):
-  model_file_path = os.path.join(CHECKPOINTS_DIR, model_file)
-
-  if not os.path.isfile(model_file_path):
-    url_opener = urllib.URLopener()
-    print "downloading " + model_file
-    url_opener.retrieve(MODEL_URL + "/" + model_file, model_file_path)
-
-def assure_model():
-  assure_checkpoints_dir()
-
-  assure_model_file(CHECKPOINT_FILE)
-  assure_model_file(MODEL_INDEX_FILE)
-  assure_model_file(MODEL_META_FILE)
-  assure_model_file(MODEL_CHECKPOINT_FILE)
 
 def decode_predictions(predictions, top=3):
   results = []
@@ -73,7 +51,6 @@ def classify(file):
 app = Flask(__name__)
 CORS(app)
 
-assure_model()
 classifier = learn.Estimator(model_fn=model_fn, model_dir=CHECKPOINTS_DIR)
 
 
