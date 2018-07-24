@@ -7,7 +7,7 @@ The deep neural network has been implemented and trained with [tensorflow](https
 
 Training was done based on a [cross-entropy](https://en.wikipedia.org/wiki/Cross_entropy) error function.
 
-![screenshot1](http://assets.nitroventures.de/tensorflow-art/tensorflow-art.png)
+![screenshot1](screenshots/tensorflow-art.png)
 
 
 
